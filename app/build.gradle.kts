@@ -23,6 +23,13 @@ android {
         // C compiler flags targeting minimal binary size
         externalNativeBuild {
             cmake {
+                arguments(
+                    "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake",
+                    "-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=C:/Users/krish/AppData/Local/Android/Sdk/ndk/27.3.13750724/build/cmake/android.toolchain.cmake",
+                    "-DVCPKG_TARGET_TRIPLET=arm64-android",
+                    "-DANDROID_ABI=arm64-v8a",
+                    "-DANDROID_PLATFORM=android-24"
+                )
                 cFlags("-Os", "-ffunction-sections", "-fdata-sections", "-fvisibility=hidden")
             }
         }

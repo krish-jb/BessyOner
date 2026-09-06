@@ -22,7 +22,8 @@ public class MainActivity extends Activity {
             String broadcastIp,
             String userName,
             String password,
-            String keyPath
+            String keyPath,
+            String config_path
     );
 
     private native String[] nativeLoadConfig(String configPath);
