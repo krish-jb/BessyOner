@@ -394,3 +394,44 @@ cleanup_session:
     return rc;
 }
 
+int send_ssh_shutdown_native(const char *ip, const char *user, const char *private_key_path) {
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) return -1;
+
+    struct sockaddr_in sin;
+    sin.sin_family = AF_INET;
+    sin.sin_port = htons(22);
+    inet_pton(AF_INET, ip, &sin.sin_addr);
+
+    if (connect(sock, (struct sockaddr*)(&sin), sizeof(struct sockaddr_in)) != 0) {
+        close(sock);
+        return -1;
+    }
+
+    LIBSSH2_SESSION *session = libssh2_session_init();
+    if (libssh2_session_handshake(session, sock)) {
+        close(sock);
+        return -1;
+    }
+
+    char public_key_path[PATH_MAX];
+    snprintf(public_key_path, sizeof(public_key_path), "%s.pub", private_key_path);
+
+    if (libssh2_userauth_publickey_fromfile(session, user, public_key_path, private_key_path, NULL)) {
+        libssh2_session_disconnect(session, "Public key auth failed!");
+        libssh2_session_free(session);
+        close(sock);
+        return -1;
+    }
+
+    LIBSSH2_CHANNEL *channel = libssh2_channel_open_session(session);
+    if (channel) {
+        libssh2_channel_exec(channel, "sudo shutdown -h now");
+        libssh2_channel_free(channel);
+    }
+
+    libssh2_session_disconnect(session, "Shutdown Executed");
+    libssh2_session_free(session);
+    close(sock);
+    return 0;
+}
