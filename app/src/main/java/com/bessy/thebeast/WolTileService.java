@@ -11,7 +11,10 @@ public class WolTileService extends TileService {
     private native int nativeExecuteWol(String config_path);
 
     private native int nativeExecuteShutdown(String config_path);
-    private final String config_path = getFilesDir().getAbsolutePath() + "/config.bin";
+
+    private String getConfigPath() {
+        return getFilesDir().getAbsolutePath() + "/config.bin";
+    }
 
     // First make this implmentation working then add ping on click before tile state change
 
@@ -21,16 +24,17 @@ public class WolTileService extends TileService {
         if (tile == null) return;
 
         int currentState = tile.getState();
+        String path = getConfigPath();
 
         new Thread(() -> {
             if (currentState == Tile.STATE_INACTIVE) {
-                if (nativeExecuteWol(config_path) == 0) {
+                if (nativeExecuteWol(path) == 0) {
                     tile.setState(Tile.STATE_ACTIVE);
                     tile.setLabel("Bessy");
                     tile.setSubtitle("On");
                 }
             } else {
-                if (nativeExecuteShutdown(config_path) == 0) {
+                if (nativeExecuteShutdown(path) == 0) {
                     tile.setState(Tile.STATE_INACTIVE);
                     tile.setLabel("Bessy");
                     tile.setSubtitle("Off");

@@ -117,14 +117,40 @@ public class MainActivity extends Activity {
         }
 
         String keyPath = getFilesDir().getAbsolutePath() + "/id_ed25519";
-        String configurePath = getFilesDir().getAbsolutePath() + "/config.bin";
+        String configPath = getFilesDir().getAbsolutePath() + "/config.bin";
 
         new Thread(() -> {
-
-        });
+            int result = nativeSaveConfigAndSetupKey(
+                    ip, macAdder, broadcastIp,
+                    userName, password, keyPath, configPath
+            );
+            runOnUiThread(() -> {
+                if (result == 0) {
+                    Toast.makeText(
+                            MainActivity.this,
+                            "Setup successful! Key stored.",
+                            Toast.LENGTH_LONG
+                    ).show();
+                    passwordInput.setText("");
+                } else {
+                    Toast.makeText(
+                            MainActivity.this,
+                            "Key exchange/config Failed. Check details.",
+                            Toast.LENGTH_LONG
+                    ).show();
+                }
+            });
+        }).start();
     }
 
     private void loadExistingConfig() {
-
+        String configPath = getFilesDir().getAbsolutePath() + "/config.bin";
+        String[] config = nativeLoadConfig(configPath);
+        if (config != null && config.length >= 4) {
+            ipInput.setText(config[0]);
+            macInput.setText(config[1]);
+            broadcastIpInput.setText(config[2]);
+            userNameInput.setText(config[3]);
+        }
     }
 }
